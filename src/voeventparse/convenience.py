@@ -7,7 +7,7 @@ import astropy.time
 import iso8601
 import lxml
 import pytz
-from orderedmultidict import omdict as OMDict
+from orderedmultidict import omdict
 
 from voeventparse.misc import Position2D
 
@@ -108,7 +108,7 @@ def get_event_position(voevent, index=0):
 
 def _get_param_children_as_omdict(subtree_element):
     elt = subtree_element
-    omd = OMDict()
+    omd = omdict()
     if elt.find("Param") is not None:
         for p in elt.Param:
             omd.add(p.attrib.get("name"), p.attrib)
@@ -139,7 +139,7 @@ def get_grouped_params(voevent):
             all_foo_vals = [atts['value'] for atts in top_params.getlist('foo')]
 
     """
-    groups_omd = OMDict()
+    groups_omd = omdict()
     w = deepcopy(voevent.What)
     lxml.objectify.deannotate(w)
     if w.find("Group") is not None:
@@ -175,7 +175,7 @@ def get_toplevel_params(voevent):
             all_foo_vals = [atts['value'] for atts in top_params.getlist('foo')]
 
     """
-    result = OrderedDict()
+    OrderedDict()
     w = deepcopy(voevent.What)
     lxml.objectify.deannotate(w)
     return _get_param_children_as_omdict(w)
@@ -194,6 +194,7 @@ def pull_astro_coords(voevent, index=0):
         compatibility, and may be removed in a future release.
         """,
         FutureWarning,
+        stacklevel=2,
     )
     return get_event_position(voevent, index)
 
@@ -211,6 +212,7 @@ def pull_isotime(voevent, index=0):
         compatibility, and may be removed in a future release.
         """,
         FutureWarning,
+        stacklevel=2,
     )
     return get_event_time_as_utc(voevent, index)
 
@@ -251,14 +253,15 @@ def pull_params(voevent):
     warnings.warn(
         """
         The function `pull_params` has been deprecated in favour of the split
-        functions `get_toplevel_params` and `get_grouped_params`, due to 
+        functions `get_toplevel_params` and `get_grouped_params`, due to
         possible name-shadowing issues when combining multilevel-nested-dicts
         (see docs for details).
-        
-        This alias is preserved for backwards compatibility, and may be 
+
+        This alias is preserved for backwards compatibility, and may be
         removed in a future release.
         """,
         FutureWarning,
+        stacklevel=2,
     )
     result = OrderedDict()
     w = deepcopy(voevent.What)

@@ -13,7 +13,7 @@ voevent_v2_0_schema = etree.XMLSchema(
 )
 
 
-def Voevent(stream, stream_id, role):
+def voevent(stream, stream_id, role):
     """Create a new VOEvent element tree, with specified IVORN and role.
 
     Args:
@@ -223,35 +223,43 @@ def set_who(voevent, date=None, author_ivorn=None):
 def set_author(
     voevent,
     title=None,
-    shortName=None,
-    logoURL=None,
-    contactName=None,
-    contactEmail=None,
-    contactPhone=None,
+    short_name=None,
+    logo_url=None,
+    contact_name=None,
+    contact_email=None,
+    contact_phone=None,
     contributor=None,
 ):
     """For setting fields in the detailed author description.
 
     This can optionally be neglected if a well defined AuthorIVORN is supplied.
 
-    .. note:: Unusually for this library,
-        the args here use CamelCase naming convention,
-        since there's a direct mapping to the ``Author.*``
-        attributes to which they will be assigned.
-
     Args:
-        voevent(:class:`Voevent`): Root node of a VOEvent etree.
+        voevent(:class:`voevent`): Root node of a VOEvent etree.
             The rest of the arguments are strings corresponding to child elements.
     """
-    # We inspect all local variables except the voevent packet,
-    # Cycling through and assigning them on the Who.Author element.
-    AuthChildren = locals()
-    AuthChildren.pop("voevent")
+    # Map snake_case arguments to CamelCase XML attributes
+    attr_map = {
+        "title": "title",
+        "short_name": "shortName",
+        "logo_url": "logoURL",
+        "contact_name": "contactName",
+        "contact_email": "contactEmail",
+        "contact_phone": "contactPhone",
+        "contributor": "contributor",
+    }
+
+    auth_children = locals()
+    auth_children.pop("voevent")
+    auth_children.pop("attr_map")
+
     if not voevent.xpath("Who/Author"):
         etree.SubElement(voevent.Who, "Author")
-    for k, v in AuthChildren.items():
+
+    for k, v in auth_children.items():
         if v is not None:
-            voevent.Who.Author[k] = v
+            xml_attr_name = attr_map.get(k, k)
+            voevent.Who.Author[xml_attr_name] = v
 
 
 def add_where_when(

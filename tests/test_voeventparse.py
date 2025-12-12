@@ -2,7 +2,6 @@ import datetime
 import tempfile
 from unittest import TestCase
 
-import pytz
 from lxml import etree, objectify
 
 import voeventparse as vp
@@ -22,10 +21,10 @@ class TestValidation(TestCase):
         """
         v = objectify.parse(datapaths.swift_bat_grb_pos_v2).getroot()
         self.assertTrue(vp.voevent_v2_0_schema.validate(v))
-        Who = v["{}Who"]
-        Who.BadChild = 42
+        who = v["{}Who"]
+        who.BadChild = 42
         self.assertFalse(vp.voevent_v2_0_schema.validate(v))
-        del Who.BadChild
+        del who.BadChild
         self.assertTrue(vp.voevent_v2_0_schema.validate(v))
 
         # NB dropping the namespace from root element invalidates packet:
@@ -48,7 +47,7 @@ class TestValidation(TestCase):
 
     def test_invalid_error_reporting(self):
         with self.assertRaises(etree.DocumentInvalid):
-            v = vp.Voevent(
+            v = vp.voevent(
                 stream="voevent.soton.ac.uk/TEST", stream_id="001", role="DeadParrot"
             )
             vp.assert_valid_as_v2_0(v)
@@ -70,13 +69,12 @@ class TestIO(TestCase):
         )
 
     def test_load_of_voe_v1(self):
-        with self.assertRaises(ValueError):
-            with open(datapaths.swift_xrt_pos_v1, "rb") as f:
-                vff = vp.load(f)
+        with self.assertRaises(ValueError), open(datapaths.swift_xrt_pos_v1, "rb") as f:
+            vp.load(f)
 
         # Can override version checking, at own risk!
         with open(datapaths.swift_xrt_pos_v1, "rb") as f:
-            vff = vp.load(f, check_version=False)
+            vp.load(f, check_version=False)
 
     def test_namespace_variations(self):
         # NB, not enclosing root element in a namespace is invalid under schema
@@ -129,18 +127,18 @@ class TestIO(TestCase):
 
 class TestMinimalVOEvent(TestCase):
     def test_make_minimal_voevent(self):
-        v1 = vp.Voevent(stream="voevent.soton.ac.uk/TEST", stream_id="100", role="test")
+        v1 = vp.voevent(stream="voevent.soton.ac.uk/TEST", stream_id="100", role="test")
         self.assertTrue(vp.valid_as_v2_0(v1))
-        v2 = vp.Voevent(stream="voevent.soton.ac.uk/TEST", stream_id=100, role="test")
+        v2 = vp.voevent(stream="voevent.soton.ac.uk/TEST", stream_id=100, role="test")
         self.assertEqual(v1.attrib["ivorn"], v2.attrib["ivorn"])
 
 
 class TestWho(TestCase):
     def setUp(self):
-        self.v = vp.Voevent(
+        self.v = vp.voevent(
             stream="voevent.soton.ac.uk/TEST", stream_id=100, role="test"
         )
-        self.date = datetime.datetime.utcnow()
+        self.date = datetime.datetime.now(datetime.UTC)
 
     def test_set_who_date(self):
         vp.set_who(self.v, self.date)
@@ -154,10 +152,10 @@ class TestWho(TestCase):
         vp.set_author(
             self.v,
             title="4 Pi Sky Project",
-            shortName="4PiSky",
-            contactName="Tim Staley",
-            contactEmail="tim.staley@soton.ac.uk",
-            contactPhone="123456789",
+            short_name="4PiSky",
+            contact_name="Tim Staley",
+            contact_email="tim.staley@soton.ac.uk",
+            contact_phone="123456789",
             contributor="Bob",
         )
         self.assertTrue(vp.valid_as_v2_0(self.v))
@@ -169,27 +167,29 @@ class TestWhat(TestCase):
         return None
 
     def setUp(self):
-        self.v = vp.Voevent(
+        self.v = vp.voevent(
             stream="voevent.soton.ac.uk/TEST", stream_id="100", role="test"
         )
 
     def test_autoconvert_off(self):
         """Param values can only be strings..."""
-        self.v.What.append(vp.Param(name="Dead Parrot", ac=False))
-        self.v.What.append(vp.Param(name="The Answer", value=str(42), ac=False))
+        self.v.What.append(vp.param(name="Dead Parrot", ac=False))
+        self.v.What.append(vp.param(name="The Answer", value=str(42), ac=False))
         self.assertTrue(vp.valid_as_v2_0(self.v))
 
         with self.assertRaises(TypeError):
-            self.v.What.append(vp.Param(name="IntValue", value=42, ac=False))
+            self.v.What.append(vp.param(name="IntValue", value=42, ac=False))
 
     def test_autoconvert_on(self):
         """...but we provide some python smarts to alleviate this."""
-        self.v.What.append(vp.Param(name="Dead Parrot"))
-        self.v.What.append(vp.Param(name="The Answer", value=42))
+        self.v.What.append(vp.param(name="Dead Parrot"))
+        self.v.What.append(vp.param(name="The Answer", value=42))
         self.v.What.append(
-            vp.Param(name="What is the time?", value=datetime.datetime.utcnow())
+            vp.param(
+                name="What is the time?", value=datetime.datetime.now(datetime.UTC)
+            )
         )
-        self.v.What.append(vp.Param(name="This is a lie", value=False))
+        self.v.What.append(vp.param(name="This is a lie", value=False))
         self.assertTrue(vp.valid_as_v2_0(self.v))
 
 
@@ -199,7 +199,7 @@ class TestWhat(TestCase):
 
 class TestWhereWhen(TestCase):
     def setUp(self):
-        self.v = vp.Voevent(
+        self.v = vp.voevent(
             stream="voevent.soton.ac.uk/TEST", stream_id="100", role="test"
         )
         self.coords1 = vp.Position2D(
@@ -211,12 +211,12 @@ class TestWhereWhen(TestCase):
         )
 
     def test_set_wherewhen(self):
-        tz_aware_timestamp = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
+        tz_aware_timestamp = datetime.datetime.now(datetime.UTC)
         vp.add_where_when(
             self.v,
             coords=self.coords1,
             obs_time=tz_aware_timestamp,
-            observatory_location=vp.definitions.observatory_location.geosurface,
+            observatory_location=vp.definitions.ObservatoryLocation.geosurface,
         )
         self.assertTrue(vp.valid_as_v2_0(self.v))
         self.assertEqual(self.coords1, vp.get_event_position(self.v))
@@ -228,21 +228,21 @@ class TestWhereWhen(TestCase):
         self.assertFalse("+" in isotime_str)
 
     def test_multiple_obs(self):
-        tz_aware_timestamp = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
-        tz_naive_timestamp = datetime.datetime.utcnow()
+        tz_aware_timestamp = datetime.datetime.now(datetime.UTC)
+        tz_naive_timestamp = datetime.datetime.now(datetime.UTC).replace(tzinfo=None)
         self.assertEqual(self.v.WhereWhen.countchildren(), 0)
         vp.add_where_when(
             self.v,
             coords=self.coords1,
             obs_time=tz_aware_timestamp,
-            observatory_location=vp.definitions.observatory_location.geosurface,
+            observatory_location=vp.definitions.ObservatoryLocation.geosurface,
         )
         self.assertEqual(self.v.WhereWhen.countchildren(), 1)
         vp.add_where_when(
             self.v,
             coords=self.coords2,
             obs_time=tz_naive_timestamp,
-            observatory_location=vp.definitions.observatory_location.geosurface,
+            observatory_location=vp.definitions.ObservatoryLocation.geosurface,
             allow_tz_naive_datetime=True,
         )
         self.assertEqual(self.v.WhereWhen.countchildren(), 2)
@@ -259,7 +259,7 @@ class TestWhereWhen(TestCase):
             self.v,
             coords=self.coords2,
             obs_time=tz_aware_timestamp,
-            observatory_location=vp.definitions.observatory_location.geosurface,
+            observatory_location=vp.definitions.ObservatoryLocation.geosurface,
         )
         self.assertEqual(self.v.WhereWhen.countchildren(), 1)
         self.assertTrue(vp.valid_as_v2_0(self.v))
@@ -267,7 +267,7 @@ class TestWhereWhen(TestCase):
 
 class TestHow(TestCase):
     def setUp(self):
-        self.v = vp.Voevent(
+        self.v = vp.voevent(
             stream="voevent.soton.ac.uk/TEST", stream_id="100", role="test"
         )
 
@@ -279,11 +279,11 @@ class TestHow(TestCase):
             descriptions, [self.v.How.Description[0], self.v.How.Description[1]]
         )
         refs = [
-            vp.Reference(
+            vp.reference(
                 "http://www.saltycrane.com/blog/2011/07/"
                 "example-parsing-xml-lxml-objectify/"
             ),
-            vp.Reference("http://github.com/timstaley/voevent-parse"),
+            vp.reference("http://github.com/timstaley/voevent-parse"),
         ]
         vp.add_how(self.v, references=refs)
         self.assertEqual(len(self.v.How.Reference), len(refs))
@@ -297,13 +297,13 @@ class TestHow(TestCase):
 
 class TestWhy(TestCase):
     def setUp(self):
-        self.v = vp.Voevent(
+        self.v = vp.voevent(
             stream="voevent.soton.ac.uk/TEST", stream_id="100", role="test"
         )
 
     def test_add_why(self):
         inferences = [
-            vp.Inference(
+            vp.inference(
                 probability=0.5, relation=None, name="Toin Coss", concept="Probability"
             )
         ]
@@ -321,17 +321,16 @@ class TestWhy(TestCase):
 
 class TestCitations(TestCase):
     def setUp(self):
-        self.v = vp.Voevent(
+        self.v = vp.voevent(
             stream="voevent.soton.ac.uk/TEST", stream_id="100", role="test"
         )
 
     def test_followup_citation(self):
-        ref = "ivo://nasa.gsfc.gcn/SWIFT#BAT_GRB_Pos_532871-729"
         vp.add_citations(
             self.v,
-            vp.EventIvorn(
+            vp.event_ivorn(
                 "ivo://nasa.gsfc.gcn/SWIFT#BAT_GRB_Pos_532871-729",
-                cite_type=vp.definitions.cite_types.followup,
+                cite_type=vp.definitions.CiteTypes.followup,
             ),
         )
         vp.assert_valid_as_v2_0(self.v)
@@ -340,9 +339,9 @@ class TestCitations(TestCase):
         # print vp.prettystr(self.v.Citations)
         vp.add_citations(
             self.v,
-            vp.EventIvorn(
+            vp.event_ivorn(
                 "ivo://nasa.gsfc.gcn/SWIFT#BAT_GRB_Pos_532871-730",
-                cite_type=vp.definitions.cite_types.followup,
+                cite_type=vp.definitions.CiteTypes.followup,
             ),
         )
         self.assertTrue(vp.valid_as_v2_0(self.v))

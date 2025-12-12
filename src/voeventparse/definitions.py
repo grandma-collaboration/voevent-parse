@@ -9,14 +9,14 @@ and document the fact that they are 'standardized' values.
 # Some useful string defs namespaced via a class container:
 
 
-class roles:
+class Roles:
     observation = "observation"
     prediction = "prediction"
     utility = "utility"
     test = "test"
 
 
-class sky_coord_system:
+class SkyCoordSystem:
     """
     Common coordinate system identifiers. See also :class:`.Position2D`.
 
@@ -45,14 +45,14 @@ class sky_coord_system:
     utc_icrs_topo = "UTC-ICRS-TOPO"
 
 
-class observatory_location:
+class ObservatoryLocation:
     """Common generic values for the WhereWhen.ObservatoryLocation attribute."""
 
     geosurface = "GEOSURFACE"
     geolunar = "GEOLUN"
 
 
-class units:
+class Units:
     """
     Unit abbreviations as defined by CDS (incomplete listing)
 
@@ -75,7 +75,7 @@ class units:
     magnitude = "mag"
 
 
-class cite_types:
+class CiteTypes:
     """Possible types of :func:`.EventIvorn`"""
 
     followup = "followup"

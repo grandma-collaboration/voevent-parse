@@ -19,7 +19,7 @@ class TestConvenienceRoutines(TestCase):
             self.gaia_noname_param_packet = vp.load(f)
         with open(datapaths.asassn_scraped_example, "rb") as f:
             self.assasn_scraped_packet = vp.load(f)
-        self.blank = vp.Voevent(
+        self.blank = vp.voevent(
             stream="voevent.foo.bar/TEST", stream_id="100", role="test"
         )
 
@@ -58,7 +58,7 @@ class TestConvenienceRoutines(TestCase):
 
             # Test known (generated) example
             single_par = copy(self.blank)
-            single_par.What.append(vp.Param(name="test_param", value=123))
+            single_par.What.append(vp.param(name="test_param", value=123))
             params = vp.pull_params(single_par)
             self.assertEqual(len(params), 1)
             self.assertEqual(list(params[None].keys()), ["test_param"])
@@ -72,9 +72,9 @@ class TestConvenienceRoutines(TestCase):
 
     def test_get_toplevel_params(self):
         v = self.blank
-        p_foo1 = vp.Param(name="foo", value=42, unit="bars", ac=True)
-        p_foo2 = vp.Param(name="foo", value=123, unit="bars", ac=True)
-        p_noname = vp.Param(name="delete_me", value=111)
+        p_foo1 = vp.param(name="foo", value=42, unit="bars", ac=True)
+        p_foo2 = vp.param(name="foo", value=123, unit="bars", ac=True)
+        p_noname = vp.param(name="delete_me", value=111)
         param_list = [p_foo1, p_foo2, p_noname]
         del p_noname.attrib["name"]
         v.What.extend(param_list)
@@ -87,13 +87,13 @@ class TestConvenienceRoutines(TestCase):
             # The old 'pull_params' routine will simply drop Params with duplicate
             # names:
             assert len(old_style_toplevel_param_dict) == (len(param_list) - 1)
-            none_group = vp.Group([], name=None)
-            complex_group1 = vp.Group(
-                [vp.Param(name="real", value=1.0), vp.Param(name="imag", value=0.5)],
+            none_group = vp.group([], name=None)
+            complex_group1 = vp.group(
+                [vp.param(name="real", value=1.0), vp.param(name="imag", value=0.5)],
                 name="complex",
             )
-            complex_group2 = vp.Group(
-                [vp.Param(name="real", value=1.5), vp.Param(name="imag", value=2.5)],
+            complex_group2 = vp.group(
+                [vp.param(name="real", value=1.5), vp.param(name="imag", value=2.5)],
                 name="complex",
             )
             group_list = [none_group, complex_group1, complex_group2]
