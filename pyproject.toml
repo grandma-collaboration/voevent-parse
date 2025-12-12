@@ -60,6 +60,10 @@ where = ["src"]
 [tool.setuptools.package-data]
 voeventparse = ["fixtures/*.xml"]
 
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"
+
 [tool.pytest.ini_options]
 addopts = [
     "-v",
