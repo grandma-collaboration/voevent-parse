@@ -1,12 +1,13 @@
 """Routines for creating sub-elements of the VOEvent tree,
 and a few other helper classes."""
 
-from collections import namedtuple
 import datetime
-from lxml import objectify, etree
+from collections import namedtuple
+
+from lxml import objectify
 
 
-class Position2D(namedtuple('Position2D', 'ra dec err units system')):
+class Position2D(namedtuple("Position2D", "ra dec err units system")):
     """A namedtuple for simple representation of a 2D position as described
     by the VOEvent spec.
 
@@ -20,19 +21,19 @@ class Position2D(namedtuple('Position2D', 'ra dec err units system')):
             cf :class:`.definitions.sky_coord_system`
 
     """
+
     pass  # Just wrapping a namedtuple so we can assign a docstring.
 
 
 _datatypes_autoconversion = {
-    bool: ('string', lambda b: str(b)),
-    int: ('int', lambda i: str(i)),
-    float: ('float', lambda f: str(f)),
-    datetime.datetime: ('string', lambda dt: dt.isoformat()),
+    bool: ("string", lambda b: str(b)),
+    int: ("int", lambda i: str(i)),
+    float: ("float", lambda f: str(f)),
+    datetime.datetime: ("string", lambda dt: dt.isoformat()),
 }
 
 
-def Param(name, value=None, unit=None, ucd=None, dataType=None, utype=None,
-          ac=True):
+def Param(name, value=None, unit=None, ucd=None, dataType=None, utype=None, ac=True):
     """
     'Parameter', used as a general purpose key-value entry in the 'What' section.
 
@@ -72,22 +73,18 @@ def Param(name, value=None, unit=None, ucd=None, dataType=None, utype=None,
     """
     # We use locals() to allow concise looping over the arguments.
     atts = locals()
-    atts.pop('ac')
+    atts.pop("ac")
     temp_dict = {}
     temp_dict.update(atts)
-    for k in temp_dict.keys():
+    for k in temp_dict:
         if atts[k] is None:
             del atts[k]
-    if (ac
-        and value is not None
-        and (not isinstance(value, str))
-        and dataType is None
-        ):
+    if ac and value is not None and (not isinstance(value, str)) and dataType is None:
         if type(value) in _datatypes_autoconversion:
             datatype, func = _datatypes_autoconversion[type(value)]
-            atts['dataType'] = datatype
-            atts['value'] = func(value)
-    return objectify.Element('Param', attrib=atts)
+            atts["dataType"] = datatype
+            atts["value"] = func(value)
+    return objectify.Element("Param", attrib=atts)
 
 
 def Group(params, name=None, type=None):
@@ -101,10 +98,10 @@ def Group(params, name=None, type=None):
     """
     atts = {}
     if name:
-        atts['name'] = name
+        atts["name"] = name
     if type:
-        atts['type'] = type
-    g = objectify.Element('Group', attrib=atts)
+        atts["type"] = type
+    g = objectify.Element("Group", attrib=atts)
     for p in params:
         g.append(p)
     return g
@@ -119,10 +116,10 @@ def Reference(uri, meaning=None):
         meaning(str): The nature of the document referenced, e.g. what
             instrument and filter was used to create the data?
     """
-    attrib = {'uri': uri}
+    attrib = {"uri": uri}
     if meaning is not None:
-        attrib['meaning'] = meaning
-    return objectify.Element('Reference', attrib)
+        attrib["meaning"] = meaning
+    return objectify.Element("Reference", attrib)
 
 
 def Inference(probability=None, relation=None, name=None, concept=None):
@@ -138,10 +135,10 @@ def Inference(probability=None, relation=None, name=None, concept=None):
     """
     atts = {}
     if probability is not None:
-        atts['probability'] = str(probability)
+        atts["probability"] = str(probability)
     if relation is not None:
-        atts['relation'] = relation
-    inf = objectify.Element('Inference', attrib=atts)
+        atts["relation"] = relation
+    inf = objectify.Element("Inference", attrib=atts)
     if name is not None:
         inf.Name = name
     if concept is not None:
@@ -175,6 +172,7 @@ def Citation(ivorn, cite_type):
     Deprecated alias of :func:`.EventIvorn`
     """
     import warnings
+
     warnings.warn(
         """
         `Citation` class has been renamed `EventIvorn` to reflect naming
@@ -182,5 +180,6 @@ def Citation(ivorn, cite_type):
         As such this class name is a deprecated alias and may be removed in a
         future release.
         """,
-        FutureWarning)
+        FutureWarning,
+    )
     return EventIvorn(ivorn, cite_type)

@@ -1,0 +1,159 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "voevent-parse"
+dynamic = ["version"]
+description = "Convenience routines for parsing and manipulation of VOEvent XML packets."
+authors = [
+    {name = "Tim Staley", email = "github@timstaley.co.uk"}
+]
+readme = "README.md"
+license = {text = "BSD"}
+requires-python = ">=3.8"
+classifiers = [
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Intended Audience :: Science/Research",
+]
+dependencies = [
+    "astropy>=1.2",
+    "lxml>=2.3",
+    "iso8601",
+    "orderedmultidict",
+    "pytz",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7",
+    "pytest-cov>=4",
+]
+dev = [
+    "pytest>=7",
+    "pytest-cov>=4",
+    "ruff>=0.1",
+]
+all = [
+    "pytest>=7",
+    "pytest-cov>=4",
+    "ruff>=0.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/timstaley/voevent-parse"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+voeventparse = ["fixtures/*.xml"]
+
+[tool.pytest.ini_options]
+addopts = [
+    "-v",
+    "--cov=voeventparse",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-branch",
+]
+testpaths = ["tests"]
+log_cli_level = "DEBUG"
+log_cli = true
+
+[tool.coverage.run]
+branch = true
+source = ["voeventparse"]
+
+[tool.coverage.paths]
+source = [
+    "src/voeventparse",
+    ".tox/*/lib/python*/site-packages/voeventparse",
+    ".tox/pypy/site-packages/voeventparse",
+]
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py38, py39, py310, py311, py312, py313, py314, docs, coverage-report
+skip_missing_interpreters = true
+
+[testenv]
+commands = py.test {posargs:-sv}
+deps =
+    pytest
+    coverage!=4.5.0
+
+[testenv:py311]
+commands = coverage run --parallel -m pytest {posargs}
+
+[testenv:py314]
+commands = coverage run --parallel -m pytest {posargs}
+
+[testenv:coverage-report]
+skip_install = true
+commands =
+    coverage combine
+    coverage report
+
+[testenv:docs]
+passenv = HOME
+setenv = TOX_DOCS = TRUE
+basepython = python3
+allowlist_externals =
+    pandoc
+deps=
+    sphinx
+commands=
+    env
+    pip install -r documentation/requirements.txt
+    pip install -e .
+    sphinx-build -W -b html -d {envtmpdir}/doctrees documentation/source  {envtmpdir}/html
+"""
+
+[tool.ruff]
+# Target Python 3.8+
+target-version = "py38"
+
+# Source code directory
+src = ["src"]
+
+[tool.ruff.lint]
+# Enable recommended rules + additional helpful rules
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort (import sorting)
+    "N",   # pep8-naming
+    "UP",  # pyupgrade (modern Python syntax)
+    "B",   # flake8-bugbear (common bugs)
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+]
+
+# Ignore specific rules if needed
+ignore = [
+    "E501",  # Line too long (handled by formatter)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Test files can have assertions and relative imports
+"tests/**/*.py" = ["S101", "N802"]
+
+[tool.ruff.format]
+# Use double quotes for strings
+quote-style = "double"
+# Indent with spaces
+indent-style = "space"

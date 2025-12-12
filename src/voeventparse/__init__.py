@@ -2,19 +2,25 @@
 A package for concise manipulation of VOEvent XML packets.
 """
 
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions
+from importlib.metadata import PackageNotFoundError, version
 
-from voeventparse.voevent import (
-    Voevent,
-    voevent_v2_0_schema,
-    load, loads, dump, dumps,
-    valid_as_v2_0, assert_valid_as_v2_0,
-    set_who, set_author, add_where_when,
-    add_how, add_why, add_citations
-)
+try:
+    __version__ = version("voevent-parse")
+except PackageNotFoundError:
+    # Package is not installed
+    __version__ = "unknown"
+
 import voeventparse.definitions as definitions
+from voeventparse.convenience import (
+    get_event_position,
+    get_event_time_as_utc,
+    get_grouped_params,
+    get_toplevel_params,
+    prettystr,
+    pull_astro_coords,
+    pull_isotime,
+    pull_params,
+)
 from voeventparse.misc import (
     Citation,
     EventIvorn,
@@ -24,13 +30,19 @@ from voeventparse.misc import (
     Position2D,
     Reference,
 )
-from voeventparse.convenience import (
-    get_event_time_as_utc,
-    get_grouped_params,
-    get_toplevel_params,
-    get_event_position,
-    pull_astro_coords,
-    pull_isotime,
-    pull_params,
-    prettystr,
+from voeventparse.voevent import (
+    Voevent,
+    add_citations,
+    add_how,
+    add_where_when,
+    add_why,
+    assert_valid_as_v2_0,
+    dump,
+    dumps,
+    load,
+    loads,
+    set_author,
+    set_who,
+    valid_as_v2_0,
+    voevent_v2_0_schema,
 )

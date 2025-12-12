@@ -8,11 +8,12 @@ and document the fact that they are 'standardized' values.
 # ############################
 # Some useful string defs namespaced via a class container:
 
+
 class roles:
-    observation = 'observation'
-    prediction = 'prediction'
-    utility = 'utility'
-    test = 'test'
+    observation = "observation"
+    prediction = "prediction"
+    utility = "utility"
+    test = "test"
 
 
 class sky_coord_system:
@@ -25,30 +26,30 @@ class sky_coord_system:
     but that's an investigation for another day.
 
     """
-    gps_fk5_topo = 'GPS-FK5-TOPO'
-    gps_icrs_geo = 'GPS-ICRS-GEO'
-    gps_icrs_topo = 'GPS-ICRS-TOPO'
 
-    tdb_fk5_bary = 'TDB-FK5-BARY'
-    tdb_icrs_bary = 'TDB-ICRS-BARY'
+    gps_fk5_topo = "GPS-FK5-TOPO"
+    gps_icrs_geo = "GPS-ICRS-GEO"
+    gps_icrs_topo = "GPS-ICRS-TOPO"
 
-    tt_fk5_geo = 'TT-FK5-GEO'
-    tt_fk5_topo = 'TT-FK5-TOPO'
-    tt_icrs_geo = 'TT-ICRS-GEO'
-    tt_icrs_topo = 'TT-ICRS-TOPO'
+    tdb_fk5_bary = "TDB-FK5-BARY"
+    tdb_icrs_bary = "TDB-ICRS-BARY"
 
-    utc_fk5_geo = 'UTC-FK5-GEO'
-    utc_fk5_topo = 'UTC-FK5-TOPO'
-    utc_icrs_geo = 'UTC-ICRS-GEO'
-    utc_icrs_topo = 'UTC-ICRS-TOPO'
+    tt_fk5_geo = "TT-FK5-GEO"
+    tt_fk5_topo = "TT-FK5-TOPO"
+    tt_icrs_geo = "TT-ICRS-GEO"
+    tt_icrs_topo = "TT-ICRS-TOPO"
+
+    utc_fk5_geo = "UTC-FK5-GEO"
+    utc_fk5_topo = "UTC-FK5-TOPO"
+    utc_icrs_geo = "UTC-ICRS-GEO"
+    utc_icrs_topo = "UTC-ICRS-TOPO"
 
 
-
-
-class observatory_location(object):
+class observatory_location:
     """Common generic values for the WhereWhen.ObservatoryLocation attribute."""
-    geosurface = 'GEOSURFACE'
-    geolunar = 'GEOLUN'
+
+    geosurface = "GEOSURFACE"
+    geolunar = "GEOLUN"
 
 
 class units:
@@ -57,28 +58,30 @@ class units:
 
     cf http://vizier.u-strasbg.fr/doc/catstd-3.2.htx
     """
-    degree = 'deg'
-    degrees = degree #Alias for backwards compatibility. Singular otherwise.
-    arcsecond = 'arcsec'
-    milliarcsecond = 'mas'
 
-    day = 'd'
-    hour = 'h'
-    minute = 'min'
-    year = 'yr'
+    degree = "deg"
+    degrees = degree  # Alias for backwards compatibility. Singular otherwise.
+    arcsecond = "arcsec"
+    milliarcsecond = "mas"
 
-    count = 'ct'
-    hertz = 'Hz'
-    jansky = 'Jy'
-    magnitude = 'mag'
+    day = "d"
+    hour = "h"
+    minute = "min"
+    year = "yr"
 
+    count = "ct"
+    hertz = "Hz"
+    jansky = "Jy"
+    magnitude = "mag"
 
 
 class cite_types:
     """Possible types of :func:`.EventIvorn`"""
-    followup = 'followup'
-    supersedes = 'supersedes'
-    retraction = 'retraction'
+
+    followup = "followup"
+    supersedes = "supersedes"
+    retraction = "retraction"
+
 
 ####################################
 #: Skeleton XML for instantiating a new VOEvent tree
@@ -93,8 +96,8 @@ v2_0_skeleton_str = b"""<?xml version="1.0" ?>
 
 ####################################
 #: VOEvent 2.0 schema for validation
-#Schema downloaded from:
-#http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd
+# Schema downloaded from:
+# http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd
 v2_0_schema_str = b"""<?xml version="1.0"?>
 <xs:schema xmlns="http://www.ivoa.net/xml/VOEvent/v2.0" xmlns:xs="http://www.w3.org/2001/XMLSchema"
   targetNamespace="http://www.ivoa.net/xml/VOEvent/v2.0" elementFormDefault="unqualified">

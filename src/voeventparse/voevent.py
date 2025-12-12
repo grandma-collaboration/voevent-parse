@@ -1,19 +1,20 @@
 """Routines for handling etrees representing VOEvent packets."""
 
-import copy
 import collections.abc
+import copy
 
 import pytz
-from lxml import objectify, etree
+from lxml import etree, objectify
 
 import voeventparse.definitions
 
 voevent_v2_0_schema = etree.XMLSchema(
-    etree.fromstring(voeventparse.definitions.v2_0_schema_str))
+    etree.fromstring(voeventparse.definitions.v2_0_schema_str)
+)
 
 from ._version import get_versions
 
-__version__ = get_versions()['version']
+__version__ = get_versions()["version"]
 
 
 def Voevent(stream, stream_id, role):
@@ -42,22 +43,20 @@ def Voevent(stream, stream_id, role):
         http://lxml.de/objectify.html#the-lxml-objectify-api
     """
     parser = objectify.makeparser(remove_blank_text=True)
-    v = objectify.fromstring(voeventparse.definitions.v2_0_skeleton_str,
-                             parser=parser)
+    v = objectify.fromstring(voeventparse.definitions.v2_0_skeleton_str, parser=parser)
     _remove_root_tag_prefix(v)
     if not isinstance(stream_id, str):
         stream_id = repr(stream_id)
-    v.attrib['ivorn'] = ''.join(('ivo://', stream, '#', stream_id))
-    v.attrib['role'] = role
+    v.attrib["ivorn"] = "".join(("ivo://", stream, "#", stream_id))
+    v.attrib["role"] = role
     # Presumably we'll always want the following children:
     # (NB, valid to then leave them empty)
-    etree.SubElement(v, 'Who')
-    etree.SubElement(v, 'What')
-    etree.SubElement(v, 'WhereWhen')
+    etree.SubElement(v, "Who")
+    etree.SubElement(v, "What")
+    etree.SubElement(v, "WhereWhen")
     v.Who.Description = (
-        'VOEvent created with voevent-parse, version {}. '
-        'See https://github.com/timstaley/voevent-parse for details.').format(
-        __version__
+        f"VOEvent created with voevent-parse, version {__version__}. "
+        "See https://github.com/timstaley/voevent-parse for details."
     )
     return v
 
@@ -97,9 +96,9 @@ def loads(s, check_version=True):
     _remove_root_tag_prefix(v)
 
     if check_version:
-        version = v.attrib['version']
-        if not version == '2.0':
-            raise ValueError('Unsupported VOEvent schema version:' + version)
+        version = v.attrib["version"]
+        if not version == "2.0":
+            raise ValueError("Unsupported VOEvent schema version:" + version)
 
     return v
 
@@ -127,7 +126,7 @@ def load(file, check_version=True):
     return loads(s, check_version)
 
 
-def dumps(voevent, pretty_print=False, xml_declaration=True, encoding='UTF-8'):
+def dumps(voevent, pretty_print=False, xml_declaration=True, encoding="UTF-8"):
     """Converts voevent to string.
 
     .. note:: Default encoding is UTF-8, in line with VOE2.0 schema.
@@ -148,9 +147,12 @@ def dumps(voevent, pretty_print=False, xml_declaration=True, encoding='UTF-8'):
     """
     vcopy = copy.deepcopy(voevent)
     _return_to_standard_xml(vcopy)
-    s = etree.tostring(vcopy, pretty_print=pretty_print,
-                       xml_declaration=xml_declaration,
-                       encoding=encoding)
+    s = etree.tostring(
+        vcopy,
+        pretty_print=pretty_print,
+        xml_declaration=xml_declaration,
+        encoding=encoding,
+    )
     return s
 
 
@@ -217,14 +219,21 @@ def set_who(voevent, date=None, author_ivorn=None):
 
     """
     if author_ivorn is not None:
-        voevent.Who.AuthorIVORN = ''.join(('ivo://', author_ivorn))
+        voevent.Who.AuthorIVORN = "".join(("ivo://", author_ivorn))
     if date is not None:
         voevent.Who.Date = date.replace(microsecond=0).isoformat()
 
 
-def set_author(voevent, title=None, shortName=None, logoURL=None,
-               contactName=None, contactEmail=None, contactPhone=None,
-               contributor=None):
+def set_author(
+    voevent,
+    title=None,
+    shortName=None,
+    logoURL=None,
+    contactName=None,
+    contactEmail=None,
+    contactPhone=None,
+    contributor=None,
+):
     """For setting fields in the detailed author description.
 
     This can optionally be neglected if a well defined AuthorIVORN is supplied.
@@ -241,16 +250,17 @@ def set_author(voevent, title=None, shortName=None, logoURL=None,
     # We inspect all local variables except the voevent packet,
     # Cycling through and assigning them on the Who.Author element.
     AuthChildren = locals()
-    AuthChildren.pop('voevent')
-    if not voevent.xpath('Who/Author'):
-        etree.SubElement(voevent.Who, 'Author')
+    AuthChildren.pop("voevent")
+    if not voevent.xpath("Who/Author"):
+        etree.SubElement(voevent.Who, "Author")
     for k, v in AuthChildren.items():
         if v is not None:
             voevent.Who.Author[k] = v
 
 
-def add_where_when(voevent, coords, obs_time, observatory_location,
-                   allow_tz_naive_datetime=False):
+def add_where_when(
+    voevent, coords, obs_time, observatory_location, allow_tz_naive_datetime=False
+):
     """
     Add details of an observation to the WhereWhen section.
 
@@ -283,21 +293,20 @@ def add_where_when(voevent, coords, obs_time, observatory_location,
     else:
         utc_naive_obs_time = obs_time
 
-    obs_data = etree.SubElement(voevent.WhereWhen, 'ObsDataLocation')
-    etree.SubElement(obs_data, 'ObservatoryLocation', id=observatory_location)
-    ol = etree.SubElement(obs_data, 'ObservationLocation')
-    etree.SubElement(ol, 'AstroCoordSystem', id=coords.system)
-    ac = etree.SubElement(ol, 'AstroCoords',
-                          coord_system_id=coords.system)
-    time = etree.SubElement(ac, 'Time', unit='s')
-    instant = etree.SubElement(time, 'TimeInstant')
+    obs_data = etree.SubElement(voevent.WhereWhen, "ObsDataLocation")
+    etree.SubElement(obs_data, "ObservatoryLocation", id=observatory_location)
+    ol = etree.SubElement(obs_data, "ObservationLocation")
+    etree.SubElement(ol, "AstroCoordSystem", id=coords.system)
+    ac = etree.SubElement(ol, "AstroCoords", coord_system_id=coords.system)
+    time = etree.SubElement(ac, "Time", unit="s")
+    instant = etree.SubElement(time, "TimeInstant")
     instant.ISOTime = utc_naive_obs_time.isoformat()
     # iso_time = etree.SubElement(instant, 'ISOTime') = obs_time.isoformat()
 
-    pos2d = etree.SubElement(ac, 'Position2D', unit=coords.units)
-    pos2d.Name1 = 'RA'
-    pos2d.Name2 = 'Dec'
-    pos2d_val = etree.SubElement(pos2d, 'Value2')
+    pos2d = etree.SubElement(ac, "Position2D", unit=coords.units)
+    pos2d.Name1 = "RA"
+    pos2d.Name2 = "Dec"
+    pos2d_val = etree.SubElement(pos2d, "Value2")
     pos2d_val.C1 = coords.ra
     pos2d_val.C2 = coords.dec
     pos2d.Error2Radius = coords.err
@@ -313,14 +322,14 @@ def add_how(voevent, descriptions=None, references=None):
         references(:py:class:`voeventparse.misc.Reference`): A reference element
             (or list thereof).
     """
-    if not voevent.xpath('How'):
-        etree.SubElement(voevent, 'How')
+    if not voevent.xpath("How"):
+        etree.SubElement(voevent, "How")
     if descriptions is not None:
         for desc in _listify(descriptions):
             # d = etree.SubElement(voevent.How, 'Description')
             # voevent.How.Description[voevent.How.index(d)] = desc
             ##Simpler:
-            etree.SubElement(voevent.How, 'Description')
+            etree.SubElement(voevent.How, "Description")
             voevent.How.Description[-1] = desc
     if references is not None:
         voevent.How.extend(_listify(references))
@@ -343,13 +352,12 @@ def add_why(voevent, importance=None, expires=None, inferences=None):
         inferences(:class:`voeventparse.misc.Inference`): Inference or list of
             inferences, denoting probable identifications or associations, etc.
     """
-    if not voevent.xpath('Why'):
-        etree.SubElement(voevent, 'Why')
+    if not voevent.xpath("Why"):
+        etree.SubElement(voevent, "Why")
     if importance is not None:
-        voevent.Why.attrib['importance'] = str(importance)
+        voevent.Why.attrib["importance"] = str(importance)
     if expires is not None:
-        voevent.Why.attrib['expires'] = expires.replace(
-            microsecond=0).isoformat()
+        voevent.Why.attrib["expires"] = expires.replace(microsecond=0).isoformat()
     if inferences is not None:
         voevent.Why.extend(_listify(inferences))
 
@@ -367,13 +375,14 @@ def add_citations(voevent, event_ivorns):
             elements to add to citation list.
 
     """
-    if not voevent.xpath('Citations'):
-        etree.SubElement(voevent, 'Citations')
+    if not voevent.xpath("Citations"):
+        etree.SubElement(voevent, "Citations")
     voevent.Citations.extend(_listify(event_ivorns))
 
 
 # ###################################################
 # And finally, utility functions...
+
 
 def _remove_root_tag_prefix(v):
     """
@@ -394,12 +403,12 @@ def _remove_root_tag_prefix(v):
     """
     if v.prefix:
         # Create subelement without a prefix via etree.SubElement
-        etree.SubElement(v, 'original_prefix')
+        etree.SubElement(v, "original_prefix")
         # Now carefully access said named subelement (without prefix cascade)
         # and alter the first value in the list of children with this name...
         # LXML syntax is a minefield!
-        v['{}original_prefix'][0] = v.prefix
-        v.tag = v.tag.replace(''.join(('{', v.nsmap[v.prefix], '}')), '')
+        v["{}original_prefix"][0] = v.prefix
+        v.tag = v.tag.replace("".join(("{", v.nsmap[v.prefix], "}")), "")
         # Now v.tag = '{}VOEvent', v.prefix = None
     return
 
@@ -408,10 +417,10 @@ def _reinsert_root_tag_prefix(v):
     """
     Returns namespace prefix to root tag, if it had one.
     """
-    if hasattr(v, 'original_prefix'):
+    if hasattr(v, "original_prefix"):
         original_prefix = v.original_prefix
         del v.original_prefix
-        v.tag = ''.join(('{', v.nsmap[original_prefix], '}VOEvent'))
+        v.tag = "".join(("{", v.nsmap[original_prefix], "}VOEvent"))
     return
 
 
