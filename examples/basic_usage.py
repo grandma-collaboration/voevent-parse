@@ -47,15 +47,16 @@ print("How about now? ", voeventparse.valid_as_v2_0(v_copy))
 print("But the original is ok, because we copied? ", voeventparse.valid_as_v2_0(v))
 
 v.Who.BadPath = "This new attribute certainly won't conform with the schema."
-assert voeventparse.valid_as_v2_0(v) == False
+assert not voeventparse.valid_as_v2_0(v)
 del v.Who.BadPath
-assert voeventparse.valid_as_v2_0(v) == True
+assert voeventparse.valid_as_v2_0(v)
 #######################################################
 # And now, SCIENCE
 #######################################################
 c = voeventparse.get_event_position(v)
 print("Coords:", c)
-print()
+
+
 toplevel_params = voeventparse.get_toplevel_params(v)
 
 # print("Toplevel Params:")
