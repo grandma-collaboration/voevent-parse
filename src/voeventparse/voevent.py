@@ -12,10 +12,6 @@ voevent_v2_0_schema = etree.XMLSchema(
     etree.fromstring(voeventparse.definitions.v2_0_schema_str)
 )
 
-from ._version import get_versions
-
-__version__ = get_versions()["version"]
-
 
 def Voevent(stream, stream_id, role):
     """Create a new VOEvent element tree, with specified IVORN and role.
@@ -55,7 +51,7 @@ def Voevent(stream, stream_id, role):
     etree.SubElement(v, "What")
     etree.SubElement(v, "WhereWhen")
     v.Who.Description = (
-        f"VOEvent created with voevent-parse, version {__version__}. "
+        "VOEvent created with voevent-parse. "
         "See https://github.com/timstaley/voevent-parse for details."
     )
     return v

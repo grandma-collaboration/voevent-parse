@@ -12,7 +12,7 @@ except ImportError as e:
     print(f"✗ Failed to import voeventparse: {e}")
     sys.exit(1)
 
-# SVOM ECLAIRs example from user
+# SVOM ECLAIRs example
 svom_xml = b"""<?xml version='1.0' encoding='UTF-8'?>
 <voe:VOEvent xmlns:voe="http://www.ivoa.net/xml/VOEvent/v2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOEvent/v2.0 http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd" role="observation" version="2.0" ivorn="ivo://org.svom/fsc#sb25120806_eclairs-wakeup">
   <Who>
