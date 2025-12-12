@@ -1,7 +1,5 @@
 """Convenience routines for common actions on VOEvent objects"""
 
-from __future__ import absolute_import
-
 from collections import OrderedDict
 from copy import deepcopy
 
@@ -9,8 +7,9 @@ import astropy.time
 import iso8601
 import lxml
 import pytz
-from voeventparse.misc import (Position2D)
-from orderedmultidict import omdict as OMDict
+from orderedmultidict import omdict
+
+from voeventparse.misc import Position2D
 
 
 def get_event_time_as_utc(voevent, index=0):
@@ -49,26 +48,24 @@ def get_event_time_as_utc(voevent, index=0):
     try:
         od = voevent.WhereWhen.ObsDataLocation[index]
         ol = od.ObservationLocation
-        coord_sys = ol.AstroCoords.attrib['coord_system_id']
-        timesys_identifier = coord_sys.split('-')[0]
+        coord_sys = ol.AstroCoords.attrib["coord_system_id"]
+        timesys_identifier = coord_sys.split("-")[0]
 
-        if timesys_identifier == 'UTC':
+        if timesys_identifier == "UTC":
             isotime_str = str(ol.AstroCoords.Time.TimeInstant.ISOTime)
             return iso8601.parse_date(isotime_str)
-        elif (timesys_identifier == 'TDB'):
+        elif timesys_identifier == "TDB":
             isotime_str = str(ol.AstroCoords.Time.TimeInstant.ISOTime)
             isotime_dtime = iso8601.parse_date(isotime_str)
-            tdb_time = astropy.time.Time(isotime_dtime, scale='tdb')
+            tdb_time = astropy.time.Time(isotime_dtime, scale="tdb")
             return tdb_time.utc.to_datetime().replace(tzinfo=pytz.UTC)
-        elif (timesys_identifier == 'TT' or timesys_identifier == 'GPS'):
+        elif timesys_identifier == "TT" or timesys_identifier == "GPS":
             raise NotImplementedError(
                 "Conversion from time-system '{}' to UTC not yet implemented"
             )
         else:
             raise ValueError(
-                'Unrecognised time-system: {} (badly formatted VOEvent?)'.format(
-                    timesys_identifier
-                )
+                f"Unrecognised time-system: {timesys_identifier} (badly formatted VOEvent?)"
             )
 
     except AttributeError:
@@ -95,24 +92,26 @@ def get_event_position(voevent, index=0):
     od = voevent.WhereWhen.ObsDataLocation[index]
     ac = od.ObservationLocation.AstroCoords
     ac_sys = voevent.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoordSystem
-    sys = ac_sys.attrib['id']
+    sys = ac_sys.attrib["id"]
 
     if hasattr(ac.Position2D, "Name1"):
-        assert ac.Position2D.Name1 == 'RA' and ac.Position2D.Name2 == 'Dec'
-    posn = Position2D(ra=float(ac.Position2D.Value2.C1),
-                      dec=float(ac.Position2D.Value2.C2),
-                      err=float(ac.Position2D.Error2Radius),
-                      units=ac.Position2D.attrib['unit'],
-                      system=sys)
+        assert ac.Position2D.Name1 == "RA" and ac.Position2D.Name2 == "Dec"
+    posn = Position2D(
+        ra=float(ac.Position2D.Value2.C1),
+        dec=float(ac.Position2D.Value2.C2),
+        err=float(ac.Position2D.Error2Radius),
+        units=ac.Position2D.attrib["unit"],
+        system=sys,
+    )
     return posn
 
 
 def _get_param_children_as_omdict(subtree_element):
     elt = subtree_element
-    omd = OMDict()
-    if elt.find('Param') is not None:
+    omd = omdict()
+    if elt.find("Param") is not None:
         for p in elt.Param:
-            omd.add(p.attrib.get('name'), p.attrib)
+            omd.add(p.attrib.get("name"), p.attrib)
     return omd
 
 
@@ -140,13 +139,12 @@ def get_grouped_params(voevent):
             all_foo_vals = [atts['value'] for atts in top_params.getlist('foo')]
 
     """
-    groups_omd = OMDict()
+    groups_omd = omdict()
     w = deepcopy(voevent.What)
     lxml.objectify.deannotate(w)
-    if w.find('Group') is not None:
+    if w.find("Group") is not None:
         for grp in w.Group:
-            groups_omd.add(grp.attrib.get('name'),
-                           _get_param_children_as_omdict(grp))
+            groups_omd.add(grp.attrib.get("name"), _get_param_children_as_omdict(grp))
     return groups_omd
 
 
@@ -177,7 +175,7 @@ def get_toplevel_params(voevent):
             all_foo_vals = [atts['value'] for atts in top_params.getlist('foo')]
 
     """
-    result = OrderedDict()
+    OrderedDict()
     w = deepcopy(voevent.What)
     lxml.objectify.deannotate(w)
     return _get_param_children_as_omdict(w)
@@ -188,13 +186,16 @@ def pull_astro_coords(voevent, index=0):
     Deprecated alias of :func:`.get_event_position`
     """
     import warnings
+
     warnings.warn(
         """
         The function `pull_astro_coords` has been renamed to
         `get_event_position`. This alias is preserved for backwards
         compatibility, and may be removed in a future release.
         """,
-        FutureWarning)
+        FutureWarning,
+        stacklevel=2,
+    )
     return get_event_position(voevent, index)
 
 
@@ -203,13 +204,16 @@ def pull_isotime(voevent, index=0):
     Deprecated alias of :func:`.get_event_time_as_utc`
     """
     import warnings
+
     warnings.warn(
         """
         The function `pull_isotime` has been renamed to
         `get_event_time_as_utc`. This alias is preserved for backwards
         compatibility, and may be removed in a future release.
         """,
-        FutureWarning)
+        FutureWarning,
+        stacklevel=2,
+    )
     return get_event_time_as_utc(voevent, index)
 
 
@@ -245,17 +249,20 @@ def pull_params(voevent):
 
     """
     import warnings
+
     warnings.warn(
         """
         The function `pull_params` has been deprecated in favour of the split
-        functions `get_toplevel_params` and `get_grouped_params`, due to 
+        functions `get_toplevel_params` and `get_grouped_params`, due to
         possible name-shadowing issues when combining multilevel-nested-dicts
         (see docs for details).
-        
-        This alias is preserved for backwards compatibility, and may be 
+
+        This alias is preserved for backwards compatibility, and may be
         removed in a future release.
         """,
-        FutureWarning)
+        FutureWarning,
+        stacklevel=2,
+    )
     result = OrderedDict()
     w = deepcopy(voevent.What)
     lxml.objectify.deannotate(w)
@@ -263,16 +270,16 @@ def pull_params(voevent):
         return result
     toplevel_params = OrderedDict()
     result[None] = toplevel_params
-    if w.find('Param') is not None:
+    if w.find("Param") is not None:
         for p in w.Param:
-            toplevel_params[p.attrib.get('name')] = p.attrib
-    if w.find('Group') is not None:
+            toplevel_params[p.attrib.get("name")] = p.attrib
+    if w.find("Group") is not None:
         for g in w.Group:
             g_params = {}
-            result[g.attrib.get('name')] = g_params
-            if hasattr(g, 'Param'):
+            result[g.attrib.get("name")] = g_params
+            if hasattr(g, "Param"):
                 for p in g.Param:
-                    g_params[p.attrib.get('name')] = p.attrib
+                    g_params[p.attrib.get("name")] = p.attrib
     return result
 
 
@@ -293,5 +300,4 @@ def prettystr(subtree):
     subtree = deepcopy(subtree)
     lxml.objectify.deannotate(subtree)
     lxml.etree.cleanup_namespaces(subtree)
-    return lxml.etree.tostring(subtree, pretty_print=True).decode(
-        encoding="utf-8")
+    return lxml.etree.tostring(subtree, pretty_print=True).decode(encoding="utf-8")

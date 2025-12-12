@@ -1,5 +1,0 @@
-graft src
-include versioneer.py
-include *.txt
-include *.md
-include *.rst

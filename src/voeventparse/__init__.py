@@ -2,37 +2,86 @@
 A package for concise manipulation of VOEvent XML packets.
 """
 
-from __future__ import absolute_import
+from importlib.metadata import PackageNotFoundError, version
 
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions
+try:
+    __version__ = version("voevent-parse")
+except PackageNotFoundError:
+    # Package is not installed
+    __version__ = "unknown"
 
-from voeventparse.voevent import (
-    Voevent,
-    voevent_v2_0_schema,
-    load, loads, dump, dumps,
-    valid_as_v2_0, assert_valid_as_v2_0,
-    set_who, set_author, add_where_when,
-    add_how, add_why, add_citations
-)
 import voeventparse.definitions as definitions
-from voeventparse.misc import (
-    Citation,
-    EventIvorn,
-    Group,
-    Inference,
-    Param,
-    Position2D,
-    Reference,
-)
 from voeventparse.convenience import (
+    get_event_position,
     get_event_time_as_utc,
     get_grouped_params,
     get_toplevel_params,
-    get_event_position,
+    prettystr,
     pull_astro_coords,
     pull_isotime,
     pull_params,
-    prettystr,
 )
+from voeventparse.misc import (
+    Position2D,
+    citation,
+    event_ivorn,
+    group,
+    inference,
+    param,
+    reference,
+)
+from voeventparse.voevent import (
+    add_citations,
+    add_how,
+    add_where_when,
+    add_why,
+    assert_valid_as_v2_0,
+    dump,
+    dumps,
+    load,
+    loads,
+    set_author,
+    set_who,
+    valid_as_v2_0,
+    voevent,
+    voevent_v2_0_schema,
+)
+
+__all__ = [
+    # Version
+    "__version__",
+    # Definitions module
+    "definitions",
+    # Convenience functions
+    "get_event_position",
+    "get_event_time_as_utc",
+    "get_grouped_params",
+    "get_toplevel_params",
+    "prettystr",
+    "pull_astro_coords",
+    "pull_isotime",
+    "pull_params",
+    # Misc classes and functions
+    "Position2D",
+    "citation",
+    "event_ivorn",
+    "group",
+    "inference",
+    "param",
+    "reference",
+    # VOEvent functions
+    "add_citations",
+    "add_how",
+    "add_where_when",
+    "add_why",
+    "assert_valid_as_v2_0",
+    "dump",
+    "dumps",
+    "load",
+    "loads",
+    "set_author",
+    "set_who",
+    "valid_as_v2_0",
+    "voevent",
+    "voevent_v2_0_schema",
+]
