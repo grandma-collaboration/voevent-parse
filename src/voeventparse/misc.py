@@ -1,8 +1,6 @@
 """Routines for creating sub-elements of the VOEvent tree,
 and a few other helper classes."""
 
-from __future__ import absolute_import
-from six import string_types
 from collections import namedtuple
 import datetime
 from lxml import objectify, etree
@@ -82,7 +80,7 @@ def Param(name, value=None, unit=None, ucd=None, dataType=None, utype=None,
             del atts[k]
     if (ac
         and value is not None
-        and (not isinstance(value, string_types))
+        and (not isinstance(value, str))
         and dataType is None
         ):
         if type(value) in _datatypes_autoconversion:

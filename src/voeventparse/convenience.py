@@ -1,7 +1,5 @@
 """Convenience routines for common actions on VOEvent objects"""
 
-from __future__ import absolute_import
-
 from collections import OrderedDict
 from copy import deepcopy
 

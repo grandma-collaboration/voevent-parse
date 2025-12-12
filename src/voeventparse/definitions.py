@@ -4,8 +4,6 @@ xml document for creation of new instances, and various other minor definitions.
 These values may be used in place of literal strings, to allow autocompletion
 and document the fact that they are 'standardized' values.
 """
-from __future__ import unicode_literals
-from six import b
 
 # ############################
 # Some useful string defs namespaced via a class container:

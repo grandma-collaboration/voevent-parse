@@ -1,13 +1,10 @@
 """Routines for handling etrees representing VOEvent packets."""
-from __future__ import absolute_import
-from __future__ import unicode_literals
 
 import copy
-import collections
+import collections.abc
 
 import pytz
 from lxml import objectify, etree
-from six import string_types
 
 import voeventparse.definitions
 
@@ -48,7 +45,7 @@ def Voevent(stream, stream_id, role):
     v = objectify.fromstring(voeventparse.definitions.v2_0_skeleton_str,
                              parser=parser)
     _remove_root_tag_prefix(v)
-    if not isinstance(stream_id, string_types):
+    if not isinstance(stream_id, str):
         stream_id = repr(stream_id)
     v.attrib['ivorn'] = ''.join(('ivo://', stream, '#', stream_id))
     v.attrib['role'] = role
@@ -429,9 +426,9 @@ def _return_to_standard_xml(v):
 # Define this for convenience in add_how:
 def _listify(x):
     """Ensure x is iterable; if not then enclose it in a list and return it."""
-    if isinstance(x, string_types):
+    if isinstance(x, str):
         return [x]
-    elif isinstance(x, collections.Iterable):
+    elif isinstance(x, collections.abc.Iterable):
         return x
     else:
         return [x]
